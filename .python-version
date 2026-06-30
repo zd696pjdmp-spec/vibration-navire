@@ -1,0 +1,1 @@
+"3.12.8" | Out-File -Encoding utf8 .python-version
