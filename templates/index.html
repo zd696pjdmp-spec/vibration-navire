@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibrationNav - Modélisation & Optimisation Vibratoire Navale</title>
+    <meta name="description" content="Plateforme d'analyse, simulation et optimisation des vibrations de torsion, axiales et latérales pour les systèmes de transmission de puissance navale.">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <base target="_blank">
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" width="28" height="28">
+                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                </svg>
+            </div>
+            <div class="logo-text">
+                <h1>VibrationNav</h1>
+                <p>Modélisation & Optimisation des Vibrations de Ligne d'Arbre</p>
+            </div>
+        </div>
+        <div class="header-badges">
+            <span class="badge badge-solver">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Solveur RK4
+            </span>
+            <span class="badge badge-analyse">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v4m0 14v4m4.22-17.22l-2.83 2.83M8.83 15.39l-2.83 2.83M23 12h-4M5 12H1m17.22 4.22l-2.83-2.83M8.83 8.61L5.99 5.78"/>
+                </svg>
+                Multi-DOF
+            </span>
+            <span class="badge badge-optim">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 20V10M6 20V4M18 20v-6"/>
+                </svg>
+                L-BFGS-B Optim
+            </span>
+        </div>
+    </header>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="main-container">
+        <!-- ONGLETS -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="simulation">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Simulation & Temporel
+            </button>
+            <button class="tab-btn" data-tab="animation">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Visualisation & Animation
+            </button>
+            <button class="tab-btn" data-tab="analyse">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 20V10M12 20V4M6 20v-6"/>
+                </svg>
+                Modes Propres & Campbell
+            </button>
+        </div>
+
+        <!-- PANNEAU SIMULATION -->
+        <div id="panel-simulation" class="tab-panel active">
+            <!-- Section Paramètres -->
+            <div class="param-section">
+                <div class="param-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        Panneau de Contrôle des Paramètres
+                    </h2>
+                    <p>Modifiez en direct les dimensions de l'arbre, les inerties et les conditions de service</p>
+                </div>
+
+                <div class="sliders-grid">
+                    <!-- Moteur -->
+                    <div class="slider-group">
+                        <div class="slider-label-row">
+                            <label>Inertie Moteur (Im)</label>
+                            <span class="slider-value" id="val-I_moteur">2.5 kg.m²</span>
+                        </div>
+                        <input type="range" class="slider" id="I_moteur" min="0.5" max="10" step="0.1" value="2.5">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label-row">
+                            <label>Régime Moteur (RPM)</label>
+                            <span class="slider-value" id="val-rpm_nominal">1200 tr/min</span>
+                        </div>
+                        <input type="range" class="slider" id="rpm_nominal" min="200" max="3000" step="50" value="1200">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label-row">
+                            <label>Ordre Excitation Moteur</label>
+                            <span class="slider-value" id="val-ordre_excitation">4</span>
+                        </div>
+                        <input type="range" class="slider" id="ordre_excitation" min="1" max="12" step="1" value="4">
+                    </div>
+
+                    <!-- Arbre -->
+                    <div class="slider-group">
+                        <div class="slider-label-row">
+                            <label>Longueur Arbre (L)</label>
+                            <span class="slider-value" id="val-L_arbre">4.0 m</span>
+                        </div>
+                        <input type="range" class="slider" id="L_arbre" min="1" max="10" step="0.1" value="4.0">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label-row">
+                            <label>Diamètre Arbre (D)</label>
+                            <span class="slider-value" id="val-D_arbre">150 mm</span>
+                        </div>
+                        <input type="range" class="slider" id="D_arbre" min="50" max="500" step="5" value="150">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label-row">
+                            <label>Amortissement Interne</label>
+                            <span class="slider-value" id="val-c_arbre">50 N.s/m</span>
+                        </div>
+                        <input type="range" class="slider" id="c_arbre" min="10" max="500" step="10" value="50">
+                    </div>
+
+                    <!-- Hélice -->
+                    <div class="slider-group">
+                        <div class="slider-label-row">
+                            <label>Masse Hélice (Mh)</label>
+                            <span class="slider-value" id="val-m_helice">45 kg</span>
+                        </div>
+                        <input type="range" class="slider" id="m_helice" min="10" max="200" step="5" value="45">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label-row">
+                            <label>Nombre de Pales</label>
+                            <span class="slider-value" id="val-nb_pales">4</span>
+                        </div>
+                        <input type="range" class="slider" id="nb_pales" min="2" max="8" step="1" value="4">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label-row">
+                            <label>Amplitude Excitation</label>
+                            <span class="slider-value" id="val-amplitude_excitation">50 N</span>
+                        </div>
+                        <input type="range" class="slider" id="amplitude_excitation" min="10" max="200" step="5" value="50">
+                    </div>
+                </div>
+
+                <div class="control-actions-panel">
+                    <div class="action-buttons">
+                        <button class="btn-primary" id="btn-simuler">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            Lancer Simulation
+                        </button>
+                        <button class="btn-secondary" id="btn-reset">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="1 4 1 10 7 10"/>
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                            </svg>
+                            Réinitialiser
+                        </button>
+                    </div>
+
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="chk-temps-reel" class="custom-checkbox">
+                        <label for="chk-temps-reel" class="checkbox-label">Simulation en temps réel (auto-update)</label>
+                    </div>
+
+                    <div class="divider-v"></div>
+
+                    <div class="optim-controls">
+                        <div class="select-group">
+                            <select id="opt-objectif" class="custom-select">
+                                <option value="min_vibration">Minimiser les vibrations globales</option>
+                                <option value="max_marge">Maximiser la marge critique</option>
+                                <option value="min_poids">Minimiser le poids (avec contraintes)</option>
+                            </select>
+                        </div>
+                        <button class="btn-accent" id="btn-optimiser">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 20V10M6 20V4M18 20v-6"/>
+                            </svg>
+                            Optimiser L-BFGS-B
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card kpi-orange">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Amplitude Torsion</span>
+                        <svg class="kpi-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12a9 9 0 1 1-6.22-8.56"/>
+                            <polyline points="21 3 21 9 15 9"/>
+                        </svg>
+                    </div>
+                    <div class="kpi-value" id="kpi-amplitude-torsion">--</div>
+                    <div class="kpi-unit">degrés</div>
+                </div>
+
+                <div class="kpi-card kpi-blue">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Amplitude Axiale</span>
+                        <svg class="kpi-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                            <polyline points="17 6 23 6 23 12"/>
+                        </svg>
+                    </div>
+                    <div class="kpi-value" id="kpi-amplitude-axiale">--</div>
+                    <div class="kpi-unit">mm</div>
+                </div>
+
+                <div class="kpi-card kpi-red">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Amplitude Latérale</span>
+                        <svg class="kpi-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 18a5 5 0 0 0 0-10c-4 0-7 3-7 7"/>
+                            <path d="M7 18a5 5 0 0 1 0-10c4 0 7 3 7 7"/>
+                        </svg>
+                    </div>
+                    <div class="kpi-value" id="kpi-amplitude-laterale">--</div>
+                    <div class="kpi-unit">mm</div>
+                </div>
+
+                <div class="kpi-card kpi-purple">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Marges de Sécurité</span>
+                        <svg class="kpi-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <div class="kpi-value-small" id="kpi-marges">T: --% | A: --% | L: --%</div>
+                    <div class="kpi-unit">Marge vs résonance critique</div>
+                </div>
+
+                <div class="kpi-card kpi-green">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Niveau Vibratoire</span>
+                        <svg class="kpi-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </div>
+                    <div class="kpi-value" id="kpi-niveau">--</div>
+                    <div class="kpi-unit" id="kpi-niveau-classe">ISO 10816</div>
+                </div>
+            </div>
+
+            <!-- Graphiques -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-glow-dot" style="background:#f97316"></span>
+                        <h3>Vibrations de Torsion (Hélice, Arbre, Moteur)</h3>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="dot" style="background:#f97316"></span>Moteur</span>
+                            <span class="legend-item"><span class="dot" style="background:#3b82f6"></span>Arbre</span>
+                            <span class="legend-item"><span class="dot" style="background:#10b981"></span>Hélice</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-torsion"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-glow-dot" style="background:#3b82f6"></span>
+                        <h3>Vibrations Axiales</h3>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="dot" style="background:#3b82f6"></span>Moteur+Arbre</span>
+                            <span class="legend-item"><span class="dot" style="background:#10b981"></span>Hélice</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-axial"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-glow-dot" style="background:#ef4444"></span>
+                        <h3>Vibrations Latérales</h3>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="dot" style="background:#f97316"></span>Moteur</span>
+                            <span class="legend-item"><span class="dot" style="background:#10b981"></span>Arbre+Hélice</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-lateral"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-glow-dot" style="background:#8b5cf6"></span>
+                        <h3>Analyse Spectrale (FFT Back-end Haute Résolution)</h3>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="dot" style="background:#8b5cf6"></span>Torsion</span>
+                            <span class="legend-item"><span class="dot" style="background:#06b6d4"></span>Axial</span>
+                            <span class="legend-item"><span class="dot" style="background:#f43f5e"></span>Latéral</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-fft"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Résultats Optimisation -->
+            <div class="opt-section" id="opt-results" style="display:none;">
+                <h3>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20V10M6 20V4M18 20v-6"/>
+                    </svg>
+                    Résultats de l'Optimisation Paramétrique
+                </h3>
+                <div class="opt-grid" id="opt-params"></div>
+            </div>
+        </div>
+
+        <!-- PANNEAU ANIMATION -->
+        <div id="panel-animation" class="tab-panel">
+            <div class="param-section">
+                <div class="param-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        Visualisation Dynamique de la Ligne d'Arbre
+                    </h2>
+                    <p>Représentation schématique animée avec amplification des déformations de torsion et flexion</p>
+                </div>
+
+                <div class="animation-container">
+                    <canvas id="animation-canvas" width="960" height="400"></canvas>
+                    <div class="animation-controls">
+                        <button class="btn-primary" id="btn-play-animation">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            Démarrer l'Animation
+                        </button>
+                        <button class="btn-secondary" id="btn-pause-animation">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="6" y="4" width="4" height="16"/>
+                                <rect x="14" y="4" width="4" height="16"/>
+                            </svg>
+                            Suspendre
+                        </button>
+                    </div>
+                    <div class="animation-legend">
+                        <div class="legend-row">
+                            <span class="legend-item"><span class="dot" style="background:#f97316"></span>Moteur (Pistons animés)</span>
+                            <span class="legend-item"><span class="dot" style="background:#475569"></span>Accouplement élastique</span>
+                            <span class="legend-item"><span class="dot" style="background:#3b82f6"></span>Ligne d'Arbre</span>
+                            <span class="legend-item"><span class="dot" style="background:#10b981"></span>Hélice Rotative</span>
+                            <span class="legend-item"><span class="line-dot" style="background:#ef4444"></span>Déviation latérale (Bending)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANNEAU ANALYSE -->
+        <div id="panel-analyse" class="tab-panel">
+            <div class="analysis-layout">
+                <!-- Colonne Gauche: Données numériques -->
+                <div class="analysis-sidebar">
+                    <div class="param-section">
+                        <div class="param-header">
+                            <h2>Fréquences Propres</h2>
+                            <p>Modes structurels du système calculés analytiquement</p>
+                        </div>
+                        <div class="freq-box-grid">
+                            <div class="analysis-card">
+                                <h4>Modes de Torsion</h4>
+                                <div class="freq-list" id="freq-torsion"></div>
+                            </div>
+                            <div class="analysis-card">
+                                <h4>Modes Axiaux</h4>
+                                <div class="freq-list" id="freq-axial"></div>
+                            </div>
+                            <div class="analysis-card">
+                                <h4>Modes Latéraux</h4>
+                                <div class="freq-list" id="freq-lateral"></div>
+                            </div>
+                            <div class="analysis-card">
+                                <h4>Excitation Active</h4>
+                                <div class="freq-list" id="freq-excitation"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="param-section" style="margin-top: 20px;">
+                        <div class="param-header">
+                            <h2>Propriétés Mécaniques de l'Arbre</h2>
+                            <p>Caractéristiques calculées à partir des géométries</p>
+                        </div>
+                        <div class="props-grid" id="props-arbre"></div>
+                    </div>
+                </div>
+
+                <!-- Colonne Droite: Diagramme de Campbell & Profil Temporel -->
+                <div class="analysis-main-charts">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2">
+                                <line x1="3" y1="21" x2="21" y2="3"/>
+                                <line x1="3" y1="21" x2="21" y2="21"/>
+                                <line x1="3" y1="21" x2="3" y2="3"/>
+                            </svg>
+                            <h3>Diagramme de Campbell (Campbell Diagram)</h3>
+                        </div>
+                        <div class="chart-container-large">
+                            <canvas id="chart-campbell"></canvas>
+                        </div>
+                        <div class="chart-footer-note">
+                            * Les intersections entre les droites d'excitation (rayons) et les fréquences propres (lignes horizontales) représentent les régimes critiques de résonance.
+                        </div>
+                    </div>
+
+                    <div class="chart-card" style="margin-top: 20px;">
+                        <div class="chart-header">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                            <h3>Profil Temporel des Contributions Vibratoires (RMS)</h3>
+                        </div>
+                        <div class="chart-container-large">
+                            <canvas id="chart-heatmap"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <span class="footer-brand">VibrationNav Industrial Suite</span>
+            <span class="footer-sep">|</span>
+            <span>Système d'Analyse Rotordynamique Avancé</span>
+            <span class="footer-sep">|</span>
+            <span>Intégration RK4 & Analyse Fréquentielle</span>
+            <span class="footer-sep">|</span>
+            <span>v1.1 Stable</span>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
